@@ -29,32 +29,35 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    dockerImage = docker.build("${IMAGE_NAME}:${RELEASE_TAG}", "-f pipeline/Dockerfile --build-arg VERSION=${RELEASE_TAG} .")
+                    // dockerImage = docker.build("${IMAGE_NAME}:${RELEASE_TAG}", "-f pipeline/Dockerfile --build-arg VERSION=${RELEASE_TAG} .")
+                    sh "docker build -f pipeline/Dockerfile -t ${IMAGE_NAME}:${RELEASE_TAG} --build-arg VERSION=${RELEASE_TAG} ."
                 }
             }
         }
 
         stage('Push Docker Image') {
-            steps {
-                withDockerRegistry([ credentialsId: 'dockerhub-creds', url: '' ]) {
-                    script {
-                        dockerImage.push()
-                        dockerImage.push("latest")
-                    }
-                }
-            }
+    steps {
+        script {
+            // Push the image with the release tag only
+            sh "docker push ${IMAGE_NAME}:${RELEASE_TAG}"
         }
+    }
+}
 
         stage('Deploy with Docker Compose') {
-            steps {
-                sh """
-                export VERSION=${RELEASE_TAG}
-                docker-compose -f pipeline/docker-compose.yml down || true
-                docker-compose -f pipeline/docker-compose.yml up -d
-                """
-            }
+    steps {
+        script {
+            // Set the RELEASE_TAG as an environment variable
+            sh """
+            export VERSION=${RELEASE_TAG}
+            # Bring down the containers if they are already running
+            docker-compose -f pipeline/docker-compose.yml down || true
+            # Build and bring up the containers with the new image version
+            docker-compose -f pipeline/docker-compose.yml up -d --build
+            """
         }
-
+    }
+}
         stage('Verify Version') {
             steps {
                 sh """
