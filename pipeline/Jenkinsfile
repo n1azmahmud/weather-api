@@ -1,0 +1,68 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKERHUB_USER = 'n1az' // Replace with your actual Docker Hub username
+        IMAGE_NAME = "${DOCKERHUB_USER}/weather-api"
+    }
+
+    triggers {
+        GenericTrigger(
+            genericVariables: [
+                [key: 'RELEASE_TAG', value: '$.release.tag_name']
+            ],
+            causeString: 'Triggered by GitHub Release $RELEASE_TAG',
+            token: 'n1az-webhook-token', // Must match GitHub webhook token
+            printContributedVariables: true,
+            printPostContent: true
+        )
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+      
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    dockerImage = docker.build("${IMAGE_NAME}:${RELEASE_TAG}", "-f pipeline/Dockerfile --build-arg VERSION=${RELEASE_TAG} .")
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                withDockerRegistry([ credentialsId: 'dockerhub-creds', url: '' ]) {
+                    script {
+                        dockerImage.push()
+                        dockerImage.push("latest")
+                    }
+                }
+            }
+        }
+
+        stage('Deploy with Docker Compose') {
+            steps {
+                sh """
+                export VERSION=${RELEASE_TAG}
+                docker-compose -f pipeline/docker-compose.yml down || true
+                docker-compose -f pipeline/docker-compose.yml up -d
+                """
+            }
+        }
+
+        stage('Verify Version') {
+            steps {
+                sh """
+                sleep 5
+                echo "Checking deployed version..."
+                curl -s http://localhost:9574/api/hello | grep ${RELEASE_TAG}
+                """
+            }
+        }
+    }
+}
