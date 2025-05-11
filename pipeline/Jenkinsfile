@@ -1,0 +1,82 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKERHUB_USERNAME = 'n1az'         // 🔁 Replace with your Docker Hub username
+        IMAGE_NAME = 'weather-api'
+        DOCKER_CREDENTIALS_ID = 'dockerhub-creds'              // 🔁 Jenkins Credentials ID for Docker Hub
+    }
+
+    // triggers {
+    //     GenericTrigger(
+    //         genericVariables: [
+    //             [key: 'RELEASE_TAG', value: '$.release.tag_name']
+    //         ],
+    //         causeString: 'Triggered by GitHub Release $RELEASE_TAG',
+    //         token: 'your-github-webhook-token',                // 🔁 Match this token in GitHub webhook setup
+    //         printContributedVariables: true,
+    //         printPostContent: true
+    //     )
+    // }
+
+    stages {
+        stage('Build Docker Image') {
+            steps {
+                dir('pipeline') {
+                    script {
+                        sh """
+                        docker build -t ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${RELEASE_TAG} \
+                            -f Dockerfile ..
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: "${DOCKER_CREDENTIALS_ID}",
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${RELEASE_TAG}
+                    docker logout
+                    '''
+                }
+            }
+        }
+
+        stage('Verify /api/hello Response') {
+            steps {
+                script {
+                    def response = sh(
+                        script: """
+                        docker run -d -p 9574:9574 --name temp-api \
+                            -e CITY=Dhaka -e API_KEY=6869faf45dd5a2eefc494ce266cf25c6 \
+                            ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${RELEASE_TAG}
+                        sleep 5
+                        curl -s http://localhost:9574/api/hello
+                        docker stop temp-api && docker rm temp-api
+                        """,
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Response: $response"
+
+                    if (!response.contains("${RELEASE_TAG}")) {
+                        error("Version mismatch: /api/hello did not return ${RELEASE_TAG}")
+                    }
+                }
+            }
+        }
+
+        stage('Ready for Deployment') {
+            steps {
+                echo "✅ Build and push successful."
+            }
+        }
+    }
+}
