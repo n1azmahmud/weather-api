@@ -75,7 +75,7 @@
                 sh """
                     sleep 5
                     echo "Checking deployed version..."
-                    curl -s http://localhost:9574/api/hello | grep ${env.VERSION_TAG}
+                    curl -V http://localhost:9574/api/hello | grep ${env.VERSION_TAG}
                 """
             }
         }
