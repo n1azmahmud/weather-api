@@ -1,8 +1,7 @@
 const express = require("express");
 const axios = require("axios");
 const moment = require("moment-timezone");
-const { version } = require("./package.json");  // Dynamically import version from package.json
-
+const version = process.env.VERSION || require("./package.json").version;
 const app = express();
 const PORT = 9574;
 const API_KEY = process.env.API_KEY;
