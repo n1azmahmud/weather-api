@@ -1,4 +1,4 @@
-pipeline {
+    pipeline {
     agent any
 
     environment {
@@ -63,13 +63,13 @@ pipeline {
                 script {
                     sh """
                         export VERSION=${env.VERSION_TAG}
-                        docker-compose -f pipeline/docker-compose.yaml down || true
-                        docker-compose -f pipeline/docker-compose.yaml up -d --build
+                        # Remove any existing weather-api container
+                        docker rm -f weather-api || true
+                        docker-compose -f pipeline/docker-compose.yml up -d --build
                     """
                 }
             }
         }
-
         stage('Verify Version') {
             steps {
                 sh """
