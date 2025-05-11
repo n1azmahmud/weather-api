@@ -1,7 +1,7 @@
 const express = require("express");
 const axios = require("axios");
-//const os = require("os");
-const moment = require("moment-timezone"); 
+const moment = require("moment-timezone");
+const { version } = require("./package.json");  // Dynamically import version from package.json
 
 const app = express();
 const PORT = 9574;
@@ -20,9 +20,9 @@ app.get('/api/hello', async (req, res) => {
     const datetime = moment().tz("Asia/Dhaka").format("YYMMDDHHmm");
 
     res.json({
-      hostname: "Niaz", 
-      datetime: datetime, 
-      version: "1.0.0",
+      hostname: "Niaz",
+      datetime: datetime,
+      version: version,  
       weather: {
         dhaka: weather
       }
