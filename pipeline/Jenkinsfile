@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_USER = 'n1az' // Replace with your actual Docker Hub username
+        DOCKERHUB_USER = 'n1az'
         IMAGE_NAME = "${DOCKERHUB_USER}/weather-api"
     }
 
@@ -12,63 +12,64 @@ pipeline {
                 [key: 'RELEASE_TAG', value: '$.release.tag_name']
             ],
             causeString: 'Triggered by GitHub Release $RELEASE_TAG',
-            token: 'n1az-webhook-token', // Must match GitHub webhook token
+            token: 'n1az-webhook-token',
             printContributedVariables: true,
             printPostContent: true
         )
     }
 
     stages {
-        stage('Checkout') {
+        stage('Initialize') {
             steps {
-                checkout scm
+                script {
+                    if (!env.RELEASE_TAG) {
+                        error("RELEASE_TAG was not provided by the webhook.")
+                    }
+                    env.VERSION_TAG = env.RELEASE_TAG // assign to another env var for clarity
+                }
             }
         }
 
         stage('Debug Release Tag') {
             steps {
-                echo "Received GitHub Release Tag: ${RELEASE_TAG}"
+                echo "Received GitHub Release Tag: ${env.VERSION_TAG}"
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    // dockerImage = docker.build("${IMAGE_NAME}:${RELEASE_TAG}", "-f pipeline/Dockerfile --build-arg VERSION=${RELEASE_TAG} .")
-                    sh "docker build -f pipeline/Dockerfile -t ${IMAGE_NAME}:${RELEASE_TAG} --build-arg VERSION=${RELEASE_TAG} ."
+                    sh "docker build -f pipeline/Dockerfile -t ${IMAGE_NAME}:${env.VERSION_TAG} --build-arg VERSION=${env.VERSION_TAG} ."
                 }
             }
         }
 
         stage('Push Docker Image') {
-    steps {
-        script {
-            // Push the image with the release tag only
-            sh "docker push ${IMAGE_NAME}:${RELEASE_TAG}"
+            steps {
+                script {
+                    sh "docker push ${IMAGE_NAME}:${env.VERSION_TAG}"
+                }
+            }
         }
-    }
-}
 
         stage('Deploy with Docker Compose') {
-    steps {
-        script {
-            // Set the RELEASE_TAG as an environment variable
-            sh """
-            export VERSION=${RELEASE_TAG}
-            # Bring down the containers if they are already running
-            docker-compose -f pipeline/docker-compose.yml down || true
-            # Build and bring up the containers with the new image version
-            docker-compose -f pipeline/docker-compose.yml up -d --build
-            """
+            steps {
+                script {
+                    sh """
+                        export VERSION=${env.VERSION_TAG}
+                        docker-compose -f pipeline/docker-compose.yml down || true
+                        docker-compose -f pipeline/docker-compose.yml up -d --build
+                    """
+                }
+            }
         }
-    }
-}
+
         stage('Verify Version') {
             steps {
                 sh """
-                sleep 5
-                echo "Checking deployed version..."
-                curl -s http://localhost:9574/api/hello | grep ${RELEASE_TAG}
+                    sleep 5
+                    echo "Checking deployed version..."
+                    curl -s http://localhost:9574/api/hello | grep ${env.VERSION_TAG}
                 """
             }
         }
