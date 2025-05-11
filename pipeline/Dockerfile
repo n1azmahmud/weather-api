@@ -1,5 +1,9 @@
 FROM node:24-slim
 
+ARG VERSION
+
+ENV VERSION=$VERSION
+
 WORKDIR /app
 
 COPY package*.json ./
