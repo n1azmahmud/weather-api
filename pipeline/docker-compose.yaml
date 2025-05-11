@@ -1,10 +1,13 @@
 services:
   weather-api:
     build:
-      context: ..
+      context: .. 
       dockerfile: pipeline/Dockerfile
+    image: "weather-api:${VERSION}"  
+    container_name: "weather-api"  
     ports:
       - "9574:9574"
     environment:
       - CITY=Dhaka
       - API_KEY=6869faf45dd5a2eefc494ce266cf25c6
+      - VERSION=${VERSION}  
