@@ -63,8 +63,8 @@ pipeline {
                 script {
                     sh """
                         export VERSION=${env.VERSION_TAG}
-                        docker-compose -f pipeline/docker-compose.yml down || true
-                        docker-compose -f pipeline/docker-compose.yml up -d --build
+                        docker-compose -f pipeline/docker-compose.yaml down || true
+                        docker-compose -f pipeline/docker-compose.yaml up -d --build
                     """
                 }
             }
