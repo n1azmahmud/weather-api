@@ -25,7 +25,12 @@ pipeline {
             }
         }
 
-      
+        stage('Debug Release Tag') {
+            steps {
+                echo "Received GitHub Release Tag: ${RELEASE_TAG}"
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 script {
