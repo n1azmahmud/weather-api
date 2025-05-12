@@ -65,8 +65,8 @@
                         export VERSION=${env.VERSION_TAG}
                         # Remove any existing weather-api container
                         docker rm -f weather-api || true
-                        docker compose down -v --remove-orphans || true
-                        docker compose -f pipeline/docker-compose.yaml up -d --build
+                        docker-compose down -v --remove-orphans || true
+                        docker-compose -f pipeline/docker-compose.yaml up -d --build
                     """
                 }
             }
