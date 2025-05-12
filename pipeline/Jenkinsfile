@@ -10,8 +10,6 @@ pipeline {
         GenericTrigger(
             genericVariables: [
                 [key: 'RELEASE_TAG', value: '$.release.tag_name'],
-                [key: 'ACTION', value: '$.action'] // Capture the action field from the webhook payload
-            ],
             causeString: 'Triggered by GitHub Release $RELEASE_TAG',
             token: 'n1az-webhook-token',
             printContributedVariables: true,
