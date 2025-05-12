@@ -1,4 +1,4 @@
-pipeline {
+ pipeline {
     agent any
 
     environment {
@@ -9,7 +9,8 @@ pipeline {
     triggers {
         GenericTrigger(
             genericVariables: [
-                [key: 'RELEASE_TAG', value: '$.release.tag_name'],
+                [key: 'RELEASE_TAG', value: '$.release.tag_name']
+            ],
             causeString: 'Triggered by GitHub Release $RELEASE_TAG',
             token: 'n1az-webhook-token',
             printContributedVariables: true,
@@ -21,18 +22,10 @@ pipeline {
         stage('Initialize') {
             steps {
                 script {
-                    // Check if the action is 'published'
-                    if (env.ACTION != 'published') {
-                        error("Release action is not 'published'. Skipping build.")
-                    }
-
-                    // Check if RELEASE_TAG is provided
                     if (!env.RELEASE_TAG) {
                         error("RELEASE_TAG was not provided by the webhook.")
                     }
-
-                    // Assign to another variable for clarity
-                    env.VERSION_TAG = env.RELEASE_TAG 
+                    env.VERSION_TAG = env.RELEASE_TAG // assign to another env var for clarity
                 }
             }
         }
@@ -40,7 +33,6 @@ pipeline {
         stage('Debug Release Tag') {
             steps {
                 echo "Received GitHub Release Tag: ${env.VERSION_TAG}"
-                echo "Release Action: ${env.ACTION}" // Debugging the ACTION
             }
         }
 
@@ -76,6 +68,16 @@ pipeline {
                         docker-compose -f pipeline/docker-compose.yaml up -d --build
                     """
                 }
+            }
+        }
+        stage('Verify Version') {
+            steps {
+                sh """
+                    sleep 5
+                    echo "Checking deployed version..."
+                    curl -s http://localhost:9574/api/hello 
+                    curl -s http://192.168.31.230:9574/api/hello 
+                """
             }
         }
     }
