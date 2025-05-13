@@ -10,15 +10,15 @@ This project is a complete implementation of a RESTful weather API service that 
 - AWS CloudWatch for observability
 
 The project is optimized for zero-downtime deployment and production readiness.
-# 2 Required API Response Format
-
+# 2 API Response Format
+### Required Format
 The `/api/hello` endpoint returns data in the following JSON format:
 
 ```json
 {
   "hostname": "Niaz",
   "datetime": "2505131220",
-  "version": "2.4.3",
+  "version": "2.4.3", // Version should match with the latest release tag
   "weather": {
     "dhaka": {
       "temperature": "38.27",
@@ -36,6 +36,15 @@ The `/api/health` endpoint returns data in the following JSON format:
 }
 ```
 
+### Achieved Format
+
+`/api/hello` response - 
+![alt text](image.png)
+![alt text](image-1.png) <--- Latest release tag
+
+`/api/health` response -
+
+![alt text](image-2.png)
 
 # 3 Features
 
