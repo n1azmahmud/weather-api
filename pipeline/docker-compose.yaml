@@ -8,6 +8,4 @@ services:
     ports:
       - "9574:9574"
     environment:
-      - CITY=Dhaka
-      - API_KEY=6869faf45dd5a2eefc494ce266cf25c6
       - VERSION=${VERSION}  
