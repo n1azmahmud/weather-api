@@ -10,4 +10,4 @@ spec:
     - port: 9574
       targetPort: 9574
       protocol: TCP
-      nodePort: 30074  # optional: can be omitted to let Kubernetes assign
+      nodePort: 30074  
