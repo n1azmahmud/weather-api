@@ -294,22 +294,28 @@ To enable CloudWatch:
 - Configure IAM Policy:
 ```
 {
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "logs:PutLogEvents",
-        "logs:CreateLogGroup",
-        "logs:CreateLogStream",
-        "logs:DescribeLogGroups",
-        "logs:DescribeLogStreams",
-        "cloudwatch:PutMetricData"
-      ],
-      "Resource": "*"
-    }
-  ]
-}
+    "AttachedPolicies": [
+        {
+            "PolicyName": "AmazonEC2FullAccess",
+            "PolicyArn": "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
+        },
+        {
+            "PolicyName": "IAMFullAccess",
+            "PolicyArn": "arn:aws:iam::aws:policy/IAMFullAccess"
+        },
+        {
+            "PolicyName": "AmazonEKSClusterPolicy",
+            "PolicyArn": "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+        },
+        {
+            "PolicyName": "AmazonEKS_CNI_Policy",
+            "PolicyArn": "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+        },
+        {
+            "PolicyName": "AmazonS3ReadOnlyAccess",
+            "PolicyArn": "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+        },
+]}
 ```
 - Deploy the Cloudwatch agent
 `kubectl apply -f https://raw.githubusercontent.com/aws-samples/amazoncloudwatch-container-insights/latest/k8s-deployment-manifest-templates/deployment-mode/daemonset/container-insights-monitoring/cwagent/cwagentdaemonset.yaml`
