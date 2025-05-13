@@ -58,18 +58,39 @@
             }
         }
 
-        stage('Deploy with Docker Compose') {
+        // stage('Deploy with Docker Compose') {
+        //     steps {
+        //         script {
+        //             sh """
+        //                 export VERSION=${env.VERSION_TAG}
+        //                 # Remove any existing weather-api container
+        //                 docker rm -f weather-api || true
+        //                 docker-compose -f pipeline/docker-compose.yaml down -v --remove-orphans || true
+        //                 docker-compose -f pipeline/docker-compose.yaml up -d --build
+        //             """
+        //         }
+        //     }
+        // }
+                stage('Deploy to EKS') {
             steps {
                 script {
                     sh """
-                        export VERSION=${env.VERSION_TAG}
-                        # Remove any existing weather-api container
-                        docker rm -f weather-api || true
-                        docker-compose -f pipeline/docker-compose.yaml down -v --remove-orphans || true
-                        docker-compose -f pipeline/docker-compose.yaml up -d --build
+                        aws eks update-kubeconfig --region us-east-1 --name weather-eks
+
+                        echo "Deploying to EKS with tag ${env.VERSION_TAG}"
+
+                        sed "s|IMAGE_TAG|${env.VERSION_TAG}|g" kubernetes/deployment.yaml > kubernetes/deployment-temp.yaml
+
+                        # Apply manifests
+                        kubectl apply -f kubernetes/secret.yaml
+                        kubectl apply -f kubernetes/service.yaml
+                        kubectl apply -f kubernetes/deployment-temp.yaml
+
+                        rm kubernetes/deployment-temp.yaml
                     """
                 }
             }
         }
+
     }
 }
