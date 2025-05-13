@@ -1,4 +1,4 @@
-# 1 Background
+# 1. Background
 
 This project is a complete implementation of a RESTful weather API service that provides real-time weather data for Dhaka city. It is designed with full automation in mind using modern DevOps principles and tools, including:
 
@@ -10,7 +10,7 @@ This project is a complete implementation of a RESTful weather API service that 
 - AWS CloudWatch for observability
 
 The project is optimized for zero-downtime deployment and production readiness.
-# 2 API Response Format
+# 2. API Response Format
 ### Required Format
 The `/api/hello` endpoint returns data in the following JSON format:
 
@@ -46,7 +46,7 @@ The `/api/health` endpoint returns data in the following JSON format:
 
 ![alt text](image-2.png)
 
-# 3 Features
+# 3. Features
 
 -  REST API endpoint `/api/hello` for weather data
 -  Health check endpoint `/api/health` to verify API and third-party availability
@@ -57,7 +57,7 @@ The `/api/health` endpoint returns data in the following JSON format:
 -  Zero downtime deployments with Kubernetes rolling updates
 -  Cloud observability with AWS CloudWatch
 
-# 4 Project Structure
+# 4. Project Structure
 ```
 weather-api/
 │
@@ -102,7 +102,7 @@ weather-api/
 ├── .gitignore
 └── README.md
 ```
-# 5 Setup Guide
+# 5. Setup Guide
 ### 5.1 Jenkins and Required Tools Setup
 
 #### Step 1: Run Jenkins with Docker
@@ -331,7 +331,7 @@ To enable CloudWatch:
 - Verify: `kubectl get daemonsets -n amazon-cloudwatch`
 
 
-### 6 Conclusion
+### 6. Conclusion
 
 This project showcases a fully automated DevOps workflow using:
 
@@ -342,8 +342,9 @@ This project showcases a fully automated DevOps workflow using:
 - CI/CD pipeline with Jenkins and Github Webhook triggering
 - Observability with CloudWatch
 
-7 References
+### 7. References
 - https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Container-Insights-setup-metrics.html
 - https://docs.aws.amazon.com/eks/latest/userguide/create-cluster.html
 - https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html
 - https://youtu.be/7wRqtBMS6E0?si=bkSOfWw4FYTHsCtJ
+- Chatgpt
