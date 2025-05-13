@@ -25,7 +25,7 @@
                     if (!env.RELEASE_TAG) {
                         error("RELEASE_TAG was not provided by the webhook.")
                     }
-                    env.VERSION_TAG = env.RELEASE_TAG // assign to another env var for clarity
+                    env.VERSION_TAG = env.RELEASE_TAG 
                 }
             }
         }
@@ -48,7 +48,6 @@
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        // Log in to Docker Hub with credentials
                         sh """
                             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
                             docker push ${IMAGE_NAME}:${env.VERSION_TAG}
@@ -81,7 +80,6 @@
 
                         sed "s|IMAGE_TAG|${env.VERSION_TAG}|g" kubernetes/deployment.yaml > kubernetes/deployment-temp.yaml
 
-                        # Apply manifests
                         kubectl apply -f kubernetes/secret.yaml
                         kubectl apply -f kubernetes/service.yaml
                         kubectl apply -f kubernetes/deployment-temp.yaml
